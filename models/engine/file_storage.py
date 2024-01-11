@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+import datetime
 
 class FileStorage:
     
@@ -34,11 +35,24 @@ class FileStorage:
         try:
             with open(FileStorage.__file_path, "r") as file:
                 loaded_objects = json.load(file)
-                for key, obj_dict in loaded_objects.item():
-                    class_name, obj_id = key.spilt('.')
+                for key, obj_dict in loaded_objects.items():
+                    class_name, obj_id = key.split('.')
                     class_ = globals()[class_name]
                     obj = class_(**obj_dict)
                     FileStorage.__objects[key] = obj
                     
         except FileNotFoundError:
             pass
+        
+    def to_dict(self):
+        dict = self.__dict__
+        dict['__class__'] = self.__class__.__name__
+
+        if 'created_at' in dict and isinstance(dict['created_at'], datetime):
+            dict['created_at'] = dict['created_at'].isoformat()
+        if 'updated_at' in dict and isinstance(dict['updated_at'], datetime):
+            dict['updated_at'] = dict['updated_at'].isoformat()
+
+        return dict
+
+
