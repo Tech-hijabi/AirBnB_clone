@@ -80,6 +80,41 @@ class HBNBCommand(cmd.Cmd):
         "Review"
     }
 
+    def default(self, arg):
+        """
+        Default method that is called when none of
+        the other do_* methods are applicable.
+        It's used to handle unrecognized commands or syntax.
+
+        Args:
+            arg (str): The argument string.
+
+        Returns:
+            The return value of the called command method if the command
+            is recognized, otherwise False.
+        """
+
+        command_dict = {
+            "all": self.do_all,
+            "count": self.do_count,
+            "destroy": self.do_destroy,
+            "show": self.do_show,
+            "update": self.do_update
+        }
+
+        match = re.search(r"\.", arg)
+        if match is not None:
+            line_arg = [arg[:match.span()[0]], arg[match.span()[1]:]]
+            match = re.search(r"\((.*?)\)", line_arg[1])
+            if match is not None:
+                command = [line_arg[1][:match.span()[0]], match.group()[1:-1]]
+                if command[0] in command_dict.keys():
+                    call = "{} {}".format(line_arg[0], command[1])
+                    return command_dict[command[0]](call)
+
+        print("*** Unknown syntax: {}".format(arg))
+        return False
+
     def do_create(self, arg):
         """
         Creates a new instance of a class.
@@ -172,6 +207,17 @@ class HBNBCommand(cmd.Cmd):
                     obj_list.append(obj.__str__())
 
             print(obj_list)
+
+    def do_count(self, arg):
+        """
+        Counts the number of instances of a given class.
+        """
+        line_arg = parse(arg)
+        counter = 0
+        for obj in storage.all().values():
+            if line_arg[0] == obj.__class__.__name__:
+                counter += 1
+        print(counter)
 
     def do_update(self, arg):
         """
