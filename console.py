@@ -1,18 +1,55 @@
 #!/usr/bin/python3
 
+"""
+This is the console module.
+
+This module provides a command line interface for interacting with
+the HBNB application.
+"""
 
 from models import storage
+from models.amenity import Amenity
 from models.base_model import BaseModel
+from models.city import City
 from models.engine.file_storage import FileStorage
+from models.place import Place
+from models.review import Review
+from models.state import State
 from models.user import User
 from shlex import split
 import cmd
 import re
-import sys
+
+
+class HBNBCommand(cmd.Cmd):
+    """
+    A command line interpreter for HBNB.
+    """
+    prompt = "(hbnb) "
+
+    __classes = {
+        "BaseModel",
+        "User",
+        "State",
+        "City",
+        "Place",
+        "Amenity",
+        "Review"
+    }
 
 
 def parse(arg):
-    
+    """
+    Parses the argument and returns a list of parts.
+    It splits the argument based on square brackets '[]' or curly braces '{}'.
+
+    Args:
+        arg (str): The argument to parse.
+
+    Returns:
+        list: A list of parts of the argument.
+    """
+
     squares = re.search(r"\[(.*?)\]", arg)
     curls = re.search(r"\{(.*?)\}", arg)
     if curls is None:
@@ -29,6 +66,7 @@ def parse(arg):
         parti.append(curls.group())
         return parti
 
+
 class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
 
@@ -42,9 +80,14 @@ class HBNBCommand(cmd.Cmd):
         "Review"
     }
 
-
     def do_create(self, arg):
-       
+        """
+        Creates a new instance of a class.
+
+        Args:
+            arg (str): The name of the class to create an instance of.
+        """
+
         line_arg = parse(arg)
         print(line_arg)
         if len(line_arg) == 0:
@@ -54,48 +97,68 @@ class HBNBCommand(cmd.Cmd):
         else:
             print(eval(line_arg[0])().id)
             storage.save()
-            
 
     def do_show(self, arg):
+        """
+        Prints the string representation of an instance based
+        on the class name and id.
+
+        Args:
+            arg (str): The class name and id of the instance.
+        """
+
         line_arg = parse(arg)
         obj_dict = storage.all()
-    
+
         if len(line_arg) == 0:
             print("** class name missing **")
         elif line_arg[0] not in HBNBCommand.__classes:
             print("** class doesn't exist **")
-        
+
         elif len(line_arg) == 1:
             print("** instance id missing **")
 
         elif "{}.{}".format(line_arg[0], line_arg[1]) not in obj_dict:
             print("** no instance found **")
-            
+
         else:
             print("{}.{}".format(line_arg[0], line_arg[1]))
-            
+
     def do_destroy(self, arg):
+        """
+        Deletes an instance based on the class name and id.
+
+        Args:
+            arg (str): The class name and id of the instance.
+        """
         line_arg = parse(arg)
         obj_dict = storage.all()
-        
+
         if len(line_arg) == 0:
             print("** class name missing **")
         elif line_arg[0] not in HBNBCommand.__classes:
             print("** class doesn't exist **")
-        
+
         elif len(line_arg) == 1:
             print("** instance id missing **")
-            
+
         elif "{}.{}".format(line_arg[0], line_arg[1]) not in obj_dict:
-            print("** no instance found **")            
+            print("** no instance found **")
 
         else:
             del obj_dict["{}.{}".format(line_arg[0], line_arg[1])]
             storage.save()
 
     def do_all(self, arg):
+        """
+        Prints all instances of a class, or all instances
+        of all classes if no class name is given.
+
+        Args:
+            arg (str): The name of the class.
+        """
         line_arg = parse(arg)
-        
+
         if len(line_arg) > 0 and line_arg[0] not in HBNBCommand.__classes:
             print("** class doesn't exist **")
 
@@ -107,10 +170,17 @@ class HBNBCommand(cmd.Cmd):
                     obj_list.append(obj.__str__())
                 elif len(line_arg) == 0:
                     obj_list.append(obj.__str__())
-                    
+
             print(obj_list)
-            
+
     def do_update(self, arg):
+        """
+        Updates an instance based on the class name
+        and id by adding or updating an attribute.
+
+        Args:
+            arg (str): The class name, id, attribute name, and attribute value.
+        """
         line_arg = parse(arg)
         obj_dict = storage.all()
 
@@ -122,7 +192,6 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return False
 
-            
         elif len(line_arg) == 1:
             print("** instance id missing **")
             return False
@@ -130,12 +199,10 @@ class HBNBCommand(cmd.Cmd):
         elif "{}.{}".format(line_arg[0], line_arg[1]) not in obj_dict:
             print("** no instance found **")
 
-
         elif len(line_arg) == 2:
             print("** attribute name missing **")
             return False
 
-        
         elif len(line_arg) == 3:
             try:
                 type(eval(line_arg[2])) != dict
@@ -143,25 +210,23 @@ class HBNBCommand(cmd.Cmd):
                 print("** value missing **")
                 return False
 
-        
         if len(line_arg) == 4:
             obj = obj_dict["{}.{}".format(line_arg[0], line_arg[1])]
-            
+
             if line_arg[2] in obj.__class__.__dict__.__keys():
                 value_type = type(obj.__class__.__dict__[line_arg[2]])
-                obj.__dict__[line_arg[2]] =  value_type(line_arg[3])
-                
+                obj.__dict__[line_arg[2]] = value_type(line_arg[3])
+
         elif type(eval(line_arg[2])) == dict:
             obj = obj_dict["{}.{}".format(line_arg[0], line_arg[1])]
             for k, v in eval(line_arg[2]).items():
-                if (k in obj.__class__.__dict__.keys() and 
-                    type(obj.__class__.__dict__[k]) in {str, int, float}):
+                if (k in obj.__class__.__dict__.keys() and
+                        type(obj.__class__.__dict__[k]) in {str, int, float}):
                     valtype = type(obj.__class__.__dict__[k])
                     obj.__dict__[k] = valtype(v)
                 else:
                     obj.__dict__[k] = v
         storage.save()
-
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt."""
@@ -170,12 +235,8 @@ class HBNBCommand(cmd.Cmd):
     def do_EOF(self, arg):
         """EOF or quit command to exit program"""
         return True
-     
+
     do_quit = do_EOF
-
-
-
-
 
 
 if __name__ == '__main__':
