@@ -1,0 +1,55 @@
+.filters {
+  background-color: white;
+  height: 70px;
+  width: 100%;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  text-align: right;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  margin: 0 auto;
+}
+
+
+section.filters button {
+  background-color: #FF5A5F;
+  color: #FFFFFF;
+  height: 48px;
+  border-radius: 4px;
+  border: #FFFFFF;
+  text-align: center;
+  position: relative;
+  transform: translateY(-50%);
+  top: 50%;
+  right: 30px;
+}
+
+.search-box:hover {
+  opacity: 0.9;
+}
+
+.locations {
+  border-right: 1px solid #DDDDDD;
+  text-align: left;
+  padding-left: 50px;
+}
+
+.amenities {
+  text-align: left;
+  padding-left: 50px;
+}
+
+.sub-loc { 
+  font-weight: 400;
+  font-size: 14px;
+  position: absolute;
+  top: 30%;
+}
+
+.sub-amenities {
+  font-weight: 400;
+  font-size: 14px;
+  position: absolute;
+  top: 30%;
+}
